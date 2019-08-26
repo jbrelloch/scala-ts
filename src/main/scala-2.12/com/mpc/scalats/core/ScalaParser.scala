@@ -63,8 +63,13 @@ final class ScalaParser(logger: Logger) {
   }
 
   private def parseObject(tpe: Type): Option[CaseObject] = {
+
+    println(s"parsing sealed union ${tpe.typeSymbol.name.toString}")
+
     val members = tpe.decls.collect {
-      case Field(m) => member(m, List.empty)
+      case Field(m) =>
+        println(s"found members ${m.name.toString}")
+        member(m, List.empty)
     }
 
     Some(CaseObject(
@@ -74,6 +79,8 @@ final class ScalaParser(logger: Logger) {
 
   private def parseSealedUnion(tpe: Type): Option[SealedUnion] = {
     // TODO: Check & warn there is no type parameters for a union type
+
+    println(s"parsing sealed union ${tpe.typeSymbol.name.toString}")
 
     // Members
     val members = tpe.decls.collect {
@@ -93,17 +100,24 @@ final class ScalaParser(logger: Logger) {
   }
 
   private def parseCaseClass(caseClassType: Type): Option[CaseClass] = {
+
+    println(s"parsing case class ${caseClassType.typeSymbol.name.toString}")
+
     val typeParams = caseClassType.typeConstructor.
       dealias.typeParams.map(_.name.decodedName.toString)
+
+    println(s"found typeParams ${typeParams.mkString(", ")}")
 
     // Members
     val members = caseClassType.members.collect {
       case Field(m) if m.isCaseAccessor =>
+        println(s"found members ${m.name.toString}")
         member(m, typeParams)
     }.toList
 
     val values = caseClassType.decls.collect {
       case Field(m) =>
+        println(s"found values ${m.name.toString}")
         member(m, typeParams)
     }.filterNot(members.contains)
 
