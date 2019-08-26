@@ -36,6 +36,8 @@ object Compiler {
     scalaTypes.flatMap { typeDef =>
       typeDef match {
         case scalaClass: ScalaModel.CaseClass => {
+
+          println(s"compiling case class ${scalaClass.name} with fields ${scalaClass.fields.map(x => x.name + ": " + x.typeRef.toString).mkString(", ")}")
           val clazz = {
             if (config.emitClasses) {
               ListSet[Declaration](compileClass(scalaClass, superInterface))
@@ -48,6 +50,8 @@ object Compiler {
         }
 
         case ScalaModel.CaseObject(name, members) => {
+
+          println(s"compiling case object ${name} with members ${members.map(x => x.name + ": " + x.typeRef.toString).mkString(", ")}")
           val values = members.map { scalaMember =>
             Member(scalaMember.name,
               compileTypeRef(scalaMember.typeRef, false))
@@ -58,13 +62,16 @@ object Compiler {
         }
 
         case ScalaModel.SealedUnion(name, fields, possibilities) => {
+
+          println(s"compiling sealedUnion ${name} with fields ${fields.map(x => x.name + ": " + x.typeRef.toString).mkString(", ")} and possibilities ${possibilities.map(x => x.name).mkString(", ")}")
+
           val ifaceFields = fields.map { scalaMember =>
             Member(scalaMember.name,
               compileTypeRef(scalaMember.typeRef, false))
           }
 
           val unionRef = InterfaceDeclaration(
-            s"I${name}", ifaceFields, ListSet.empty[String], superInterface)
+            name, ifaceFields, ListSet.empty[String], superInterface)
 
           compile(possibilities, Some(unionRef)) + UnionDeclaration(
             name,
@@ -183,7 +190,7 @@ object Compiler {
         compileTypeRef(innerType, inInterfaceContext),
         UndefinedRef))
 
-    case ScalaModel.UnknownTypeRef(_) =>
-      TypeScriptModel.StringRef
+    case ScalaModel.UnknownTypeRef(x) =>
+      SimpleTypeRef(x)
   }
 }
