@@ -46,8 +46,9 @@ final class TypeScriptEmitter(val config: Config) {
 
     out.println("{")
 
-    fields.foreach(fieldName => {
-      out.println(s"$indent$fieldName = '$fieldName',")
+    fields.sorted.foreach(fieldName => {
+      val lowerCaseFieldName = fieldName.head.toLower + fieldName.tail
+      out.println(s"$indent$lowerCaseFieldName = '$lowerCaseFieldName',")
     })
 
     out.println("}")

@@ -3,13 +3,16 @@ import sbt.Keys._
 lazy val root = (project in file(".")).
   settings(Seq(
     name := "scala-ts",
-    organization := "com.github.miloszpp",
+    organization := "jbrelloch",
     mainClass in (Compile, run) := Some("com.mpc.scalats.Main"),
     sbtPlugin := true,
     scalaVersion := "2.12.7",
     crossScalaVersions := Seq("2.10.7", scalaVersion.value),
     publishArtifact in (Compile, packageDoc) := false,
-    sbtVersion in pluginCrossBuild := {
+      publishMavenStyle := true,
+      bintrayOrganization := None,
+      bintrayRepository := "scala-ts",
+  sbtVersion in pluginCrossBuild := {
       scalaBinaryVersion.value match {
         case "2.10" => "0.13.16"
         case "2.12" => "1.1.0"
